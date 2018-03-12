@@ -2,14 +2,16 @@ define([
     'underscore',
     'backbone',
     'model/base'
-], function(_, Backbone, BaseModel){
+], function(_, Backbone, BaseModel) {
     'use strict';
     var Substance = BaseModel.extend({
-        url: function(){
-            return weboillib.config.oil_api + '/oil/' + this.get('adios_oil_id');
+        url: function() {
+            return (weboillib.config.oil_api +
+                    '/oil/?adios_oil_id=' +
+                    this.get('adios_oil_id'));
         },
 
-        parseTemperatures: function(){
+        parseTemperatures: function() {
             var flashPointK = this.get('flash_point_max_k');
             var pourPointK = this.get('pour_point_max_k');
 
@@ -27,7 +29,7 @@ define([
                    };
         },
 
-        validate: function(attrs, options){
+        validate: function(attrs, options) {
             // if (_.isUndefined(attrs.bullwinkle_fraction)){
             //     return 'Stable emulsion fraction must be defined!';
             // }
@@ -45,14 +47,17 @@ define([
             // }
         },
 
-        parseCategories: function(){
+        parseCategories: function() {
             var cats = this.get('categories');
             var output = [];
-            for(var c in cats){
+
+            for (var c in cats) {
                 output.push(cats[c].parent.name + ' - ' + cats[c].name);
             }
+
             return output;
         }
     });
+
     return Substance;
 });

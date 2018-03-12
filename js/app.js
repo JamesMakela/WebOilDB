@@ -34,7 +34,7 @@ define([
             $.ajaxPrefilter(_.bind(function(options, originalOptions, jqxhr) {
                 if (options.url.indexOf('http://') === -1 &&
                         options.url.indexOf('https://') === -1) {
-                    options.url = weboillib.config.api + options.url;
+                    options.url = weboillib.config.oil_api + options.url;
                     // add a little cache busting so IE doesn't cache everything...
                     options.url += '?' + (Math.random()*10000000000000000);
                 }
@@ -419,16 +419,13 @@ define([
         capabilities: function(){
             var thisApp = this;
 
-            $.get(this.config.oil_api + '/uploaded')
+            $.get(this.config.oil_api + '/capabilities')
             .done(function(result) {
                 // We are just trying to figure out whether our API server
                 // supports persistent uploads.  If we succeed here at all,
                 // then persistent uploads are indeed supported
-                thisApp.config.can_persist = true;
+                Object.assign(thisApp.config, result);
             })
-            .fail(function() {
-                thisApp.config.can_persist = false;
-            });
         },
 
         ajaxSuppressCaching: function() {

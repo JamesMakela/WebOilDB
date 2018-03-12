@@ -55,6 +55,7 @@ define([
             }
 
             // Passed oilTable's events hash to this view's events
+            console.log('rendering oil table...');
             this.oilTable.on('renderTable', this.renderTable, this);
 
             // Initialized oilDistinct collection so it is available for the
@@ -295,6 +296,8 @@ define([
 
             substance.fetch({
                 success: _.bind(function(model) {
+                    console.log('substance: ', substance);
+
                     this.model.set('substance', substance);
                     this.model.save(null, {
                         success: _.bind(function() {
