@@ -425,7 +425,7 @@ define([
                 // supports persistent uploads.  If we succeed here at all,
                 // then persistent uploads are indeed supported
                 Object.assign(thisApp.config, result);
-            })
+            });
         },
 
         ajaxSuppressCaching: function() {
