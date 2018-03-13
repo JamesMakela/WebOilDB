@@ -5,13 +5,12 @@ define([
     'views/default/index',
     'views/default/menu',
     'views/default/footer',
-    'views/default/logger',
     'views/default/overview',
     'views/default/faq',
     'views/default/notfound',
     'views/form/oil/library'
 ], function($, _, Backbone,
-            IndexView, MenuView, FooterView, LoggerView,
+            IndexView, MenuView, FooterView,
             OverviewView, FAQView, NotFoundView,
             OilLibraryView) {
     'use strict';
@@ -41,16 +40,8 @@ define([
 
             if (window.location.href.indexOf('trajectory') === -1 ||
                     weboillib.model.get('mode') === 'adios' ||
-                weboillib.model.get('mode') === 'roc') {
+                    weboillib.model.get('mode') === 'roc') {
                 this.views.push(new FooterView());
-            }
-
-            if(_.isUndefined(this.logger) && window.location.hash !== '') {
-                this.logger = new LoggerView();
-            }
-            else if(this.logger && window.location.hash === '') {
-                this.logger.close();
-                this.logger = undefined;
             }
         },
 

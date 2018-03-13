@@ -58,7 +58,8 @@ define([
 
         toggleView: function(e){
             var view;
-            if(_.isObject(e)){
+
+            if (_.isObject(e)) {
                 view = this.$(e.target).attr('class').replace('view ', '');
                 this.$('.view-toggle .switch').attr('class', 'switch ' + view);
 
@@ -67,8 +68,10 @@ define([
                 view = e;
                 this.$('.view-toggle .switch').attr('class', 'switch ' + e);
             }
+
             this.$('.view-toggle .switch').attr('data-original-title',
-                                                this.$('.view-toggle .' + view).data('original-title'));
+                                                this.$('.view-toggle .' + view)
+                                                    .data('original-title'));
         },
 
         openAppMenu: function(event){
