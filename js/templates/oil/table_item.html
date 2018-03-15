@@ -1,0 +1,24 @@
+{% var api = oil.get('api'); %}
+{% var quality_index = oil.get('quality_index'); %}
+{% var categories = oil.get('categories'); %}
+
+{% api = api !== undefined ? api.toFixed(1) : null; %}
+{% quality_index = quality_index !== undefined ? Math.round(quality_index) * 100 : null; %}
+{% categories = categories !== undefined ? categories : []; %}
+{% var isGeneric = categories.indexOf('Other-Generic') >= 0; %}
+
+<tr data-generic="{{ isGeneric }}"
+    data-id="{{ oil.get('adios_oil_id') }}"
+    data-name="{{ oil.get('name') }}">
+
+    <td style="width: 25%"> {{ oil.get('name') }} </td>
+    <td style="width: 25%"> {{ oil.get('location') }} </td>
+    <td style="width: 7%">{{ api }}</td>
+    <td style="width: 7%">{{ quality_index }}</td>
+    <td style="width: 20%">
+        {% for (var k = categories.length - 1; k >= 0; k--) { %}
+            <span class="label label-warning">{{ categories[k] }}</span>
+        {% } %}
+        <a class="btn btn-primary btn-xs oilInfo">More Info</a>
+    </td>
+</tr>

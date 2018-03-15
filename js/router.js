@@ -67,6 +67,7 @@ define([
         query: function(){
             this.menu('add');
             this.views.push(new OilLibraryView());
+            console.log('router.query(): ' + this.views);
         },
 
         notfound: function(actions){

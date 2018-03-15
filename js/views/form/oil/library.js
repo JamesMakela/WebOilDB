@@ -9,45 +9,49 @@ define([
     'text!templates/form/oil.html',
     'model/substance',
     'model/oil/distinct',
-    'views/modal/form',
+    'views/base',
     'views/modal/loading',
     'views/form/oil/table',
     'views/form/oil/specific',
     'jqueryui/widgets/slider'
 ], function($, _, Backbone, module, chosen, moment, swal,
-            OilTemplate, SubstanceModel, OilDistinct, FormModal, LoadingModal,
+            OilTemplate, SubstanceModel, OilDistinct, BaseView, LoadingModal,
             OilTable, SpecificOil) {
     'use strict';
-    var oilLibForm = FormModal.extend({
-        className: 'modal form-modal oil-form',
+    var oilLibForm = BaseView.extend({
+        className: 'page oil-form',
         name: 'oillib',
         title: 'ADIOS Oil Library',
         size: 'lg',
-        buttons: '<button type="button" class="cancel" data-dismiss="modal">Cancel</button><button type="button" class="backOil">Back</button><button type="button" class="save">Select</button>',
 
         events: function() {
             // Overwriting the update listeners so they do not fire for the chosen input box
-            var formModalHash = FormModal.prototype.events;
-            delete formModalHash['change input'];
-            delete formModalHash['keyup input'];
+            var formHash = BaseView.prototype.events;
+            delete formHash['change input'];
+            delete formHash['keyup input'];
 
-            formModalHash['input:not(.chosen-search input)'] = 'update';
-            formModalHash['keyup input:not(.chosen-search input)'] = 'update';
-            formModalHash['click .nav-tabs a'] = 'rendered';
-            formModalHash.ready = 'triggerTableResize';
-            formModalHash['show.bs.modal'] = 'scrollToSelect';
+            formHash['input:not(.chosen-search input)'] = 'update';
+            formHash['keyup input:not(.chosen-search input)'] = 'update';
+            formHash['click .nav-tabs a'] = 'rendered';
+            formHash.ready = 'triggerTableResize';
+            formHash['show.bs.modal'] = 'scrollToSelect';
 
-            return _.defaults(OilTable.prototype.events, formModalHash);
+            return _.defaults(OilTable.prototype.events, formHash);
         },
 
         initialize: function(options, elementModel) {
-            this.module = module;
+            console.log('>> library.initialize()');
+            BaseView.prototype.initialize.call(this, options);
+            this.template = _.template(OilTemplate);
+
+            // this.module = module;
             this.oilTable = new OilTable(elementModel);
             this.model = elementModel;
             this.oilCache = localStorage.getItem('oil_cache');
             var oilCacheJson = JSON.parse(this.oilCache);
 
-            if (_.isNull(oilCacheJson) || moment().unix() - oilCacheJson.ts > 86400) {
+            if (_.isNull(oilCacheJson) ||
+                    moment().unix() - oilCacheJson.ts > 86400) {
                 // Initialize and render loading modal following request
                 // to view Oil Library collection
                 this.loadingGif = new LoadingModal({title: "Loading Oil Database..."});
@@ -55,52 +59,25 @@ define([
             }
 
             // Passed oilTable's events hash to this view's events
-            console.log('rendering oil table...');
             this.oilTable.on('renderTable', this.renderTable, this);
 
             // Initialized oilDistinct collection so it is available for the
             // view render
             this.oilDistinct = new OilDistinct();
-            FormModal.prototype.initialize.call(this, options);
+
+            this.render();
         },
 
         render: function(options) {
-            if (this.oilTable.ready && this.oilDistinct.ready) {
-                // Template in oilTable's html to oilLib's template prior to
-                // render call
-                this.body = _.template(OilTemplate, {
-                    oilTable: this.oilTable.$el.html(),
-                    results: this.oilTable.oilLib.length
-                });
+            console.log('>> library.render()');
+            this.$el.append(this.template());
+            BaseView.prototype.render.call(this);
+            $('body').append(this.$el)
 
+            if (this.oilTable.ready && this.oilDistinct.ready) {
                 if (!_.isUndefined(this.loadingGif)) {
                     this.loadingGif.hide();
                 }
-
-                this.$el.one('shown.bs.modal', _.bind(function() {
-                    this.$('.backOil').hide();
-                    // Initialize the select menus of class chosen-select to use the chosen jquery plugin
-                    this.populateSelect();
-
-                    // Grabbing the minimum and maximum api, and viscosity
-                    // values from the fetched collection so the slider only
-                    // covers the range of relevant values when rendered
-                    this.findMinMax(['api', 'viscosity', 'pour_point']);
-
-                    if (this.viscosity_max.toString().length > 3) {
-                        this.viscosity_max = this.viscosity_max.toExponential();
-                    }
-
-                    // Use the jquery-ui slider to enable sliders so the user can select the range of API,
-                    // viscosity, and/or pour point values they would want to search for
-                    this.createSliders(this.api_min, this.api_max, '.slider-api');
-                    this.createSliders(this.viscosity_min, this.viscosity_max, '.slider-viscosity');
-                    this.createSliders(this.pour_point_min, this.pour_point_max, '.slider-pourpoint');
-
-                    this.updateTooltipWidth();
-                }, this));
-
-                FormModal.prototype.render.call(this, options);
             }
             else if (!this.oilTable.ready) {
                 this.oilTable.once('ready', this.render, this);
@@ -182,6 +159,7 @@ define([
         },
 
         renderTable: function() {
+            console.log('>> renderTable()...');
             this.$('#tableContainer').html(this.oilTable.$el.html());
         },
 
@@ -263,7 +241,7 @@ define([
             this.oilId = $(e.currentTarget).parents('tr').data('id');
 
             if (this.oilId) {
-                this.$('.oilContainer').hide();
+                this.$('.oilQueryContainer').hide();
                 this.oilTable.oilLib.fetchOil(this.oilId, _.bind(function(model) {
                    this.specificOil = new SpecificOil({model: model});
                 }, this));
@@ -271,21 +249,6 @@ define([
 
             this.$('.backOil').show();
             this.$('.cancel').hide();
-        },
-
-        close: function() {
-            if (this.specificOil) {
-                this.specificOil.close();
-            }
-
-            this.oilTable.close();
-            this.trigger('close');
-
-            FormModal.prototype.close.call(this);
-
-            if (!_.isUndefined(this.loadingGif)) {
-                this.loadingGif.close();
-            }
         },
 
         save: function() {
@@ -393,7 +356,7 @@ define([
             this.specificOil.close();
             this.$('.backOil').hide();
             this.$('.cancel').show();
-            this.$('.oilContainer').show();
+            this.$('.oilQueryContainer').show();
 
             this.scrollToSelect();
         }

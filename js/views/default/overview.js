@@ -3,7 +3,7 @@ define([
     'underscore',
     'backbone',
     'text!templates/default/overview.html'
-], function($, _, Backbone, FAQTemplate){
+], function($, _, Backbone, OverviewTemplate){
     'use strict';
 	var overviewView = Backbone.View.extend({
         className: 'page overview',
@@ -19,7 +19,7 @@ define([
         },
 
         render: function(){
-            var compiled = _.template(FAQTemplate, {});
+            var compiled = _.template(OverviewTemplate, {});
             $('body').append(this.$el.append(compiled));
         }
     });
