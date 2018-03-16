@@ -72,7 +72,7 @@ define([
             console.log('>> library.render()');
             this.$el.append(this.template());
             BaseView.prototype.render.call(this);
-            $('body').append(this.$el)
+            $('body').append(this.$el);
 
             if (this.oilTable.ready && this.oilDistinct.ready) {
                 if (!_.isUndefined(this.loadingGif)) {
